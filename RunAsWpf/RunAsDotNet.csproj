@@ -59,6 +59,7 @@
     <Compile Include="MsiShortcutParser.cs" />
     <Compile Include="Profile.cs" />
     <Compile Include="ProgramEntry.cs" />
+    <Compile Include="SimpleAes.cs" />
     <Compile Include="Win32.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

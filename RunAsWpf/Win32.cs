@@ -219,11 +219,11 @@ namespace RunAsDotNet
 				}
 
 				// Wait for process to end
-				uiResultWait = WaitForSingleObject(processInfo.hProcess, INFINITE);
+				/*uiResultWait = WaitForSingleObject(processInfo.hProcess, INFINITE);
 				if (uiResultWait == WAIT_FAILED)
 				{
 					throw new Exception("WaitForSingleObject error #" + Marshal.GetLastWin32Error());
-				}
+				}*/
 
 			}
 			finally

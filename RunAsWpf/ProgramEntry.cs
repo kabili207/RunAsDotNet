@@ -4,6 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Windows.Media;
 using System.ComponentModel;
+using System.Drawing;
+using System.Runtime.Serialization;
+using System.IO;
+using System.Drawing.Imaging;
+using System.Windows.Media.Imaging;
 
 namespace RunAsDotNet
 {
@@ -12,6 +17,8 @@ namespace RunAsDotNet
 	{
 		private string _name;
 		private string _path;
+
+		[NonSerialized]
 		private ImageSource _image;
 
 		public string Name
@@ -44,6 +51,7 @@ namespace RunAsDotNet
 			}
 		}
 
+		[field: NonSerialized]
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		private void OnPropertyChanged(string prop)
@@ -51,6 +59,49 @@ namespace RunAsDotNet
 			if (PropertyChanged != null)
 			{
 				PropertyChanged(this, new PropertyChangedEventArgs(prop));
+			}
+		}
+
+		[OnDeserialized]
+		private void SetValuesOnDeserialized(StreamingContext context)
+		{
+			SetImage(IconFromFilePath(Path));
+		}
+
+		public static Icon IconFromFilePath(string filePath)
+		{
+			Icon result = null;
+			try
+			{
+				result = Icon.ExtractAssociatedIcon(filePath);
+			}
+			catch
+			{
+				// swallow and return nothing. You could supply a default Icon here as well
+			}
+			return result;
+		}
+
+		public void SetImage(Icon icon)
+		{
+			if (icon == null)
+			{
+				Image = null;
+			}
+			else
+			{
+
+				using (MemoryStream memory = new MemoryStream())
+				{
+					icon.ToBitmap().Save(memory, ImageFormat.Png);
+					memory.Position = 0;
+					BitmapImage bitmapImage = new BitmapImage();
+					bitmapImage.BeginInit();
+					bitmapImage.StreamSource = memory;
+					bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+					bitmapImage.EndInit();
+					Image = bitmapImage;
+				}
 			}
 		}
 	}

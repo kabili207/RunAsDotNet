@@ -57,6 +57,7 @@ namespace RunAsDotNet
 			}
 		}
 
+		[field: NonSerialized]
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		public Profile()
