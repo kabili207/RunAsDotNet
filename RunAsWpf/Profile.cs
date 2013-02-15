@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Runtime.Serialization;
 
 namespace RunAsDotNet
 {
 	[Serializable]
 	public class Profile : INotifyPropertyChanged
 	{
-		public ObservableCollection<ProgramEntry> Entries { get; set; }
+		public ProgramEntryCollection Entries { get; set; }
 
 		private string _name;
 		private string _domain;
@@ -57,12 +58,13 @@ namespace RunAsDotNet
 			}
 		}
 
+
 		[field: NonSerialized]
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		public Profile()
 		{
-			Entries = new ObservableCollection<ProgramEntry>();
+			Entries = new ProgramEntryCollection();
 		}
 
 		private void OnPropertyChanged(string prop)

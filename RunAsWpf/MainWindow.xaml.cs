@@ -87,7 +87,7 @@ namespace RunAsDotNet
 
 					string realPath = ofd.FileName;
 					FileInfo info = new FileInfo(realPath);
-					if(info.Extension == ".lnk")
+					if(info.Extension.ToLower() == ".lnk")
 						realPath = MsiShortcutParser.ParseShortcut(ofd.FileName);
 					entry.Path = realPath;
 					entry.Name = ofd.SafeFileName;
@@ -104,7 +104,7 @@ namespace RunAsDotNet
 						entry.Name = versionInfo.FileDescription;
 
 					entry.SetImage(ProgramEntry.IconFromFilePath(realPath));
-					_programs.Add(entry);
+					_programs.Insert(0, entry);
 					lstPrograms.SelectedItem = entry;
 					SaveProfiles();
 					CreateJumpTasks();
@@ -125,6 +125,12 @@ namespace RunAsDotNet
 			ProgramEntry entry = lstPrograms.SelectedItem as ProgramEntry;
 			if (entry != null)
 			{
+				Profile profile = cmbProfiles.SelectedItem as Profile;
+				int index = profile.Entries.IndexOf(entry);
+				profile.Entries.Move(index, 0);
+
+				CreateJumpTasks();
+
 				string user = txtUserName.Text; //"anagle";
 				string domain = txtDomain.Text; // "leeds_pdc";
 				string password = txtPassword.Password; // "**********";
@@ -179,24 +185,7 @@ namespace RunAsDotNet
 
 		private void CreateJumpTasks()
 		{
-			_jumpList.JumpItems.Clear();
-			foreach (Profile profile in _profiles)
-			{
-				foreach (ProgramEntry entry in profile.Entries)
-				{
-					// Configure a new JumpTask.
-					JumpTask jumpTask1 = new JumpTask();
-					// Get the path to Calculator and set the JumpTask properties.
-					jumpTask1.ApplicationPath = System.Reflection.Assembly.GetEntryAssembly().Location;
-					jumpTask1.IconResourcePath = entry.Path;
-					jumpTask1.Title = entry.Name;
-					//jumpTask1.Description = "Open Calculator.";
-					jumpTask1.CustomCategory = profile.Name;
-					jumpTask1.Arguments = string.Format("\"{0}\" \"{1}\"", profile.Name, entry.Path);
-					_jumpList.JumpItems.Add(jumpTask1);
-				}
-			}
-			_jumpList.Apply();
+			_profiles.CreateJumpTasks(_jumpList);
 		}
 
 		private void LoadProfiles()

@@ -31,15 +31,32 @@ namespace RunAsDotNet
 				string sPath = e.Args[1];
 
 				string path = App.AppDataPath + "\\Profiles.dat";
-
+				ProfileCollection profiles = null;
 				using (FileStream fs = new FileStream(path, FileMode.Open))
 				{
-					ProfileCollection profiles = ProfileCollection.FromStream(fs);
-					Profile profile = profiles.FirstOrDefault(x => x.Name == sProfile);
-					if (profile != null)
+					profiles = ProfileCollection.FromStream(fs);
+					if (profiles != null)
 					{
-						profile.LaunchProgram(sPath);
-						doShutDown = true;
+						Profile profile = profiles.GetByName(sProfile);
+						if (profile != null)
+						{
+							profile.LaunchProgram(sPath);
+							ProgramEntry entry = profile.Entries.FirstOrDefault(x => x.Path == sPath);
+							if (entry != null)
+							{
+								int index = profile.Entries.IndexOf(entry);
+								profile.Entries.Move(index, 0);
+							}
+							doShutDown = true;
+						}
+					}
+				}
+				if (doShutDown)
+				{
+					using (FileStream fs = new FileStream(path, FileMode.Create))
+					{
+						profiles.ToStream(fs);
+						profiles.CreateJumpTasks(new System.Windows.Shell.JumpList());
 					}
 				}
 			}

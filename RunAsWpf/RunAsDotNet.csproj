@@ -63,6 +63,7 @@
     <Compile Include="Profile.cs" />
     <Compile Include="ProfileCollection.cs" />
     <Compile Include="ProgramEntry.cs" />
+    <Compile Include="ProgramEntryCollection.cs" />
     <Compile Include="SimpleAes.cs" />
     <Compile Include="Win32.cs" />
     <Page Include="MainWindow.xaml">
