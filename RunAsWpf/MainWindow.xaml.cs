@@ -19,6 +19,7 @@ using System.Drawing.Imaging;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
+using System.Windows.Shell;
 
 namespace RunAsDotNet
 {
@@ -27,7 +28,9 @@ namespace RunAsDotNet
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		ObservableCollection<Profile> _profiles = null;
+		private JumpList _jumpList = new JumpList();
+
+		ProfileCollection _profiles = null;
 
 		public MainWindow()
 		{
@@ -39,7 +42,7 @@ namespace RunAsDotNet
 			} catch {}
 			if (_profiles == null)
 			{
-				_profiles = new ObservableCollection<Profile>();
+				_profiles = new ProfileCollection();
 				_profiles.Add(new Profile()
 				{
 					Name = "Default"
@@ -63,6 +66,7 @@ namespace RunAsDotNet
 				Profile profile = cmbProfiles.SelectedItem as Profile;
 				profile.Entries.Remove(entry);
 				SaveProfiles();
+				CreateJumpTasks();
 			}
 		}
 
@@ -103,6 +107,7 @@ namespace RunAsDotNet
 					_programs.Add(entry);
 					lstPrograms.SelectedItem = entry;
 					SaveProfiles();
+					CreateJumpTasks();
 				}
 			}
 		}
@@ -131,7 +136,7 @@ namespace RunAsDotNet
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine("LaunchCommand error: " + ex.Message);
+					MessageBox.Show("LaunchCommand error: " + ex.Message);
 				}
 			}
 		}
@@ -160,47 +165,47 @@ namespace RunAsDotNet
 
 		private void SaveProfiles()
 		{
-			string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-			path += "\\RunAsDotNet";
+			string path = App.AppDataPath;
 			if (!Directory.Exists(path))
 				Directory.CreateDirectory(path);
+
 			path += "\\Profiles.dat";
 
 			using (FileStream fs = new FileStream(path, FileMode.Create))
 			{
-				BinaryFormatter formatter = new BinaryFormatter();
-				try
+				_profiles.ToStream(fs);
+			}
+		}
+
+		private void CreateJumpTasks()
+		{
+			_jumpList.JumpItems.Clear();
+			foreach (Profile profile in _profiles)
+			{
+				foreach (ProgramEntry entry in profile.Entries)
 				{
-					formatter.Serialize(fs, _profiles);
-				}
-				catch (SerializationException e)
-				{
-					Console.WriteLine("Failed to serialize. Reason: " + e.Message);
-					throw;
+					// Configure a new JumpTask.
+					JumpTask jumpTask1 = new JumpTask();
+					// Get the path to Calculator and set the JumpTask properties.
+					jumpTask1.ApplicationPath = System.Reflection.Assembly.GetEntryAssembly().Location;
+					jumpTask1.IconResourcePath = entry.Path;
+					jumpTask1.Title = entry.Name;
+					//jumpTask1.Description = "Open Calculator.";
+					jumpTask1.CustomCategory = profile.Name;
+					jumpTask1.Arguments = string.Format("\"{0}\" \"{1}\"", profile.Name, entry.Path);
+					_jumpList.JumpItems.Add(jumpTask1);
 				}
 			}
+			_jumpList.Apply();
 		}
 
 		private void LoadProfiles()
 		{
-			string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-			path += "\\RunAsDotNet\\" + "Profiles.dat";
+			string path = App.AppDataPath + "\\Profiles.dat";
 
 			using (FileStream fs = new FileStream(path, FileMode.Open))
 			{
-				try
-				{
-					BinaryFormatter formatter = new BinaryFormatter();
-
-					// Deserialize the hashtable from the file and 
-					// assign the reference to the local variable.
-					_profiles = (ObservableCollection<Profile>)formatter.Deserialize(fs);
-				}
-				catch (SerializationException e)
-				{
-					Console.WriteLine("Failed to deserialize. Reason: " + e.Message);
-					throw;
-				}
+				_profiles = ProfileCollection.FromStream(fs);
 			}
 		}
 	}

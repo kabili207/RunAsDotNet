@@ -72,5 +72,17 @@ namespace RunAsDotNet
 				PropertyChanged(this, new PropertyChangedEventArgs(prop));
 			}
 		}
+
+		public void LaunchProgram(ProgramEntry entry)
+		{
+			LaunchProgram(entry.Path);
+		}
+
+		public void LaunchProgram(string path)
+		{
+			string pass = new SimpleAES().Decrypt(_password);
+			Win32.LaunchCommand(path, _domain, _userName, pass, Win32.LogonFlags.LOGON_NETCREDENTIALS_ONLY);
+		}
+
 	}
 }
