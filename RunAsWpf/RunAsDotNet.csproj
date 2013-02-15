@@ -64,6 +64,9 @@
     <Compile Include="ProfileCollection.cs" />
     <Compile Include="ProgramEntry.cs" />
     <Compile Include="ProgramEntryCollection.cs" />
+    <Compile Include="RenameProfile.xaml.cs">
+      <DependentUpon>RenameProfile.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SimpleAes.cs" />
     <Compile Include="Win32.cs" />
     <Page Include="MainWindow.xaml">
@@ -78,6 +81,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="RenameProfile.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

@@ -158,17 +158,6 @@ namespace RunAsDotNet
 			}
 		}
 
-		private void txtPassword_PasswordChanged(object sender, RoutedEventArgs e)
-		{
-			Profile profile = cmbProfiles.SelectedItem as Profile;
-			if (profile != null)
-			{
-				SimpleAES aes = new SimpleAES();
-				profile.Password = aes.Encrypt(txtPassword.Password);
-				SaveProfiles();
-			}
-		}
-
 		private void SaveProfiles()
 		{
 			string path = App.AppDataPath;
@@ -195,6 +184,38 @@ namespace RunAsDotNet
 			using (FileStream fs = new FileStream(path, FileMode.Open))
 			{
 				_profiles = ProfileCollection.FromStream(fs);
+			}
+		}
+
+		private void btnRenameProfile_Click(object sender, RoutedEventArgs e)
+		{
+			Profile profile = cmbProfiles.SelectedItem as Profile;
+			if (profile != null)
+			{
+				RenameProfile form = new RenameProfile(profile);
+				form.Owner = this;
+				if (form.ShowDialog() == true)
+				{
+					SaveProfiles();
+					_profiles.CreateJumpTasks(_jumpList);
+				}
+				
+			}
+		}
+
+		private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+		{
+			SaveProfiles();
+		}
+
+		private void txtPassword_LostFocus(object sender, RoutedEventArgs e)
+		{
+			Profile profile = cmbProfiles.SelectedItem as Profile;
+			if (profile != null)
+			{
+				SimpleAES aes = new SimpleAES();
+				profile.Password = aes.Encrypt(txtPassword.Password);
+				TextBox_LostFocus(sender, e);
 			}
 		}
 	}

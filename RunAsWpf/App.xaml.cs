@@ -41,7 +41,7 @@ namespace RunAsDotNet
 						if (profile != null)
 						{
 							profile.LaunchProgram(sPath);
-							ProgramEntry entry = profile.Entries.FirstOrDefault(x => x.Path == sPath);
+							ProgramEntry entry = profile.Entries.GetByPath(sPath);
 							if (entry != null)
 							{
 								int index = profile.Entries.IndexOf(entry);
