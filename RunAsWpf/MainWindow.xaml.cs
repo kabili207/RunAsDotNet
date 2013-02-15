@@ -39,7 +39,8 @@ namespace RunAsDotNet
 			try
 			{
 				LoadProfiles();
-			} catch {}
+			}
+			catch { }
 			if (_profiles == null)
 			{
 				_profiles = new ProfileCollection();
@@ -87,7 +88,7 @@ namespace RunAsDotNet
 
 					string realPath = ofd.FileName;
 					FileInfo info = new FileInfo(realPath);
-					if(info.Extension.ToLower() == ".lnk")
+					if (info.Extension.ToLower() == ".lnk")
 						realPath = MsiShortcutParser.ParseShortcut(ofd.FileName);
 					entry.Path = realPath;
 					entry.Name = ofd.SafeFileName;
@@ -131,9 +132,9 @@ namespace RunAsDotNet
 
 				CreateJumpTasks();
 
-				string user = txtUserName.Text; //"anagle";
-				string domain = txtDomain.Text; // "leeds_pdc";
-				string password = txtPassword.Password; // "**********";
+				string user = txtUserName.Text;
+				string domain = txtDomain.Text;
+				string password = txtPassword.Password;
 				string program = entry.Path;
 
 				try
@@ -154,7 +155,10 @@ namespace RunAsDotNet
 			if (profile != null)
 			{
 				SimpleAES aes = new SimpleAES();
-				txtPassword.Password = aes.Decrypt(profile.Password);
+				if (string.IsNullOrWhiteSpace(profile.Password))
+					txtPassword.Password = "";
+				else
+					txtPassword.Password = aes.Decrypt(profile.Password);
 			}
 		}
 
@@ -199,7 +203,7 @@ namespace RunAsDotNet
 					SaveProfiles();
 					_profiles.CreateJumpTasks(_jumpList);
 				}
-				
+
 			}
 		}
 
@@ -216,6 +220,38 @@ namespace RunAsDotNet
 				SimpleAES aes = new SimpleAES();
 				profile.Password = aes.Encrypt(txtPassword.Password);
 				TextBox_LostFocus(sender, e);
+			}
+		}
+
+		private void btnAddProfile_Click(object sender, RoutedEventArgs e)
+		{
+			Profile profile = new Profile();
+			RenameProfile form = new RenameProfile(profile);
+			form.Owner = this;
+			form.Title = "Add Profile";
+			if (form.ShowDialog() == true)
+			{
+				_profiles.Add(profile);
+				cmbProfiles.SelectedItem = profile;
+			}
+		}
+
+		private void btnDeleteProfile_Click(object sender, RoutedEventArgs e)
+		{
+			Profile profile = cmbProfiles.SelectedItem as Profile;
+			if (MessageBox.Show("Are you sure you want to delete this profile?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+			{
+				_profiles.Remove(profile);
+				if (_profiles.Count == 0)
+				{
+					_profiles.Add(new Profile()
+					{
+						Name = "Default"
+					});
+				}
+				cmbProfiles.SelectedIndex = 0;
+				SaveProfiles();
+				_profiles.CreateJumpTasks(_jumpList);
 			}
 		}
 	}
