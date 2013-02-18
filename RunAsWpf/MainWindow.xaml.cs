@@ -48,6 +48,7 @@ namespace RunAsDotNet
 				{
 					Name = "Default"
 				});
+				_profiles.DefaultProfile = "Default";
 			}
 			cmbProfiles.ItemsSource = _profiles;
 			//cmbProfiles.SelectedIndex = 0;
@@ -56,6 +57,17 @@ namespace RunAsDotNet
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			cmbProfiles.SelectedIndex = 0;
+			if (!string.IsNullOrWhiteSpace(_profiles.DefaultProfile))
+			{
+				Profile profile = _profiles.GetByName(_profiles.DefaultProfile);
+				if (profile != null)
+					cmbProfiles.SelectedItem = profile; 
+			}
+		}
+
+		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			SaveProfiles();
 		}
 
 		private void btnDeleteProgram_Click(object sender, RoutedEventArgs e)
@@ -63,7 +75,6 @@ namespace RunAsDotNet
 			ProgramEntry entry = lstPrograms.SelectedItem as ProgramEntry;
 			if (entry != null)
 			{
-
 				Profile profile = cmbProfiles.SelectedItem as Profile;
 				profile.Entries.Remove(entry);
 				SaveProfiles();
@@ -78,25 +89,44 @@ namespace RunAsDotNet
 			{
 				var _programs = profile.Entries;
 				OpenFileDialog ofd = new OpenFileDialog();
-				//ofd.Filter = "Solutions files (*.sln)|*.sln";
+				ofd.Filter = "Programs (*.lnk, *.exe)|*.lnk;*.exe";
 				ofd.DereferenceLinks = false;
+				ofd.Multiselect = true;
 				ofd.InitialDirectory = Win32.GetStartMenuPath();
 				if (ofd.ShowDialog() == true)
 				{
+					AddProgram(ofd.FileNames);
+				}
+			}
+		}
 
+		private void AddProgram(string files)
+		{
+			AddProgram(new string[] { files });
+		}
+
+		private void AddProgram(IEnumerable<string> files)
+		{
+			Profile profile = cmbProfiles.SelectedItem as Profile;
+			if (profile != null)
+			{
+				List<string> failedFiles = new List<string>();
+				var _programs = profile.Entries;
+				foreach (string file in files)
+				{
 					ProgramEntry entry = new ProgramEntry();
 
-					string realPath = ofd.FileName;
+					string realPath = file;
 					FileInfo info = new FileInfo(realPath);
 					if (info.Extension.ToLower() == ".lnk")
-						realPath = MsiShortcutParser.ParseShortcut(ofd.FileName);
+						realPath = MsiShortcutParser.ParseShortcut(realPath);
 					entry.Path = realPath;
-					entry.Name = ofd.SafeFileName;
+					entry.Name = file;
 
 					if (_programs.Count(x => x.Path == realPath) > 0)
 					{
-						MessageBox.Show("This program has already been added");
-						return;
+						failedFiles.Add(realPath);
+						continue;
 					}
 
 					FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(realPath);
@@ -106,10 +136,17 @@ namespace RunAsDotNet
 
 					entry.SetImage(ProgramEntry.IconFromFilePath(realPath));
 					_programs.Insert(0, entry);
-					lstPrograms.SelectedItem = entry;
-					SaveProfiles();
-					CreateJumpTasks();
 				}
+				if (failedFiles.Count > 0)
+				{
+					MessageBox.Show("The program(s) have already been added:" + 
+						string.Join(Environment.NewLine, failedFiles.ToArray()),
+						"Failed to add program", MessageBoxButton.OK, MessageBoxImage.Error);
+				}
+
+				lstPrograms.SelectedIndex = 0;
+				SaveProfiles();
+				CreateJumpTasks();
 			}
 		}
 
@@ -164,6 +201,9 @@ namespace RunAsDotNet
 
 		private void SaveProfiles()
 		{
+			Profile profile = cmbProfiles.SelectedItem as Profile;
+			if (profile != null)
+				_profiles.DefaultProfile = profile.Name;
 			string path = App.AppDataPath;
 			if (!Directory.Exists(path))
 				Directory.CreateDirectory(path);
@@ -252,6 +292,39 @@ namespace RunAsDotNet
 				cmbProfiles.SelectedIndex = 0;
 				SaveProfiles();
 				_profiles.CreateJumpTasks(_jumpList);
+			}
+		}
+
+		private void lstPrograms_DragEnter(object sender, DragEventArgs e)
+		{
+
+		}
+
+		private void lstPrograms_DragOver(object sender, DragEventArgs e)
+		{
+			e.Effects = DragDropEffects.None;
+			if (e.Data.GetDataPresent("FileDrop", true))
+			{
+				string[] data = (string[])e.Data.GetData("FileDrop");
+				bool accept = data.Any(x => x.ToLower().EndsWith(".lnk") || x.ToLower().EndsWith(".exe"));
+				e.Effects = accept ? DragDropEffects.Link : DragDropEffects.None;
+			}
+			e.Handled = true;
+		}
+
+		private void lstPrograms_Drop(object sender, DragEventArgs e)
+		{
+			if (e.Data.GetDataPresent("FileDrop", true))
+			{
+				string[] datas = (string[])e.Data.GetData("FileDrop");
+				foreach (string data in datas)
+				{
+					if (data.ToLower().EndsWith(".lnk") || data.ToLower().EndsWith(".exe"))
+					{
+						AddProgram(data);
+					}
+				}
+				e.Handled = true;
 			}
 		}
 	}

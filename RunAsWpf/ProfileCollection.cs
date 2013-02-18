@@ -13,6 +13,11 @@ namespace RunAsDotNet
 	[Serializable]
 	public class ProfileCollection : ObservableCollection<Profile>
 	{
+		/// <summary>
+		/// Gets or sets the name of the default profile
+		/// </summary>
+		public string DefaultProfile { get; set; }
+
 		public ProfileCollection()
 			: base()
 		{

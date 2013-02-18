@@ -76,6 +76,7 @@
     </ApplicationDefinition>
     <Compile Include="Csidl.cs" />
     <Compile Include="MsiShortcutParser.cs" />
+    <Compile Include="PrincipalContext.cs" />
     <Compile Include="Profile.cs" />
     <Compile Include="ProfileCollection.cs" />
     <Compile Include="ProgramEntry.cs" />
