@@ -17,7 +17,8 @@ namespace RunAsDotNet
         );
         */
         [DllImport("msi.dll", CharSet = CharSet.Auto)]
-        static extern int MsiGetShortcutTarget(string targetFile, StringBuilder productCode, StringBuilder featureID, StringBuilder componentCode);
+        static extern int MsiGetShortcutTarget(string targetFile, StringBuilder productCode,
+			StringBuilder featureID, StringBuilder componentCode);
 
         public enum InstallState
         {
@@ -52,6 +53,13 @@ namespace RunAsDotNet
         [DllImport("msi.dll", CharSet = CharSet.Auto)]
         static extern InstallState MsiGetComponentPath(string productCode, string componentCode, StringBuilder componentPath, ref int componentPathBufferSize);
 
+		/// <summary>
+		/// Parses the shortcut specifed and returns the path to the executable it references
+		/// </summary>
+		/// <param name="file">The path of the shortcut</param>
+		/// <returns>
+		/// The path of the executable or <c>null</c> if the shortcut could not be parsed
+		/// </returns>
         public static string ParseShortcut(string file)
         {
             StringBuilder product = new StringBuilder(MaxGuidLength + 1);

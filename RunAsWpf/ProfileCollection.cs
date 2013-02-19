@@ -30,6 +30,11 @@ namespace RunAsDotNet
 
 		}
 
+		/// <summary>
+		/// Creates a ProfileCollection from the specified stream
+		/// </summary>
+		/// <param name="stream">The stream</param>
+		/// <returns>The profile collection</returns>
 		public static ProfileCollection FromStream(Stream stream)
 		{
 			try
@@ -46,7 +51,7 @@ namespace RunAsDotNet
 			}
 			catch (SerializationException e)
 			{
-				Console.WriteLine("Failed to deserialize. Reason: " + e.Message);
+				//Console.WriteLine("Failed to deserialize. Reason: " + e.Message);
 				throw;
 			}
 		}
@@ -64,29 +69,46 @@ namespace RunAsDotNet
 				throw;
 			}
 		}
+		
+		/// <summary>
+		/// Gets the default profile if one exists.
+		/// </summary>
+		/// <returns>The default profile or <c>null</c> if one does not exist.</returns>
+		public Profile GetDefaultProfile()
+		{
+			return GetByName(DefaultProfile);
+		}
 
+		/// <summary>
+		/// Gets the profile with the specifed <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">The name of the profile</param>
+		/// <returns>The profile who's name matches the one specified</returns>
 		public Profile GetByName(string name)
 		{
 			return this.FirstOrDefault(x => x.Name == name); ;
 		}
 
+		/// <summary>
+		/// Re-creates the jump tasks associated with the specified JumpList
+		/// </summary>
+		/// <param name="jumpList">The JumpList to re-create</param>
 		public void CreateJumpTasks(JumpList jumpList)
 		{
 			jumpList.JumpItems.Clear();
 			foreach (Profile profile in this)
 			{
-				foreach (ProgramEntry entry in profile.Entries)
+				foreach (ProgramEntry entry in profile.Entries.SortedView)
 				{
-					// Configure a new JumpTask.
-					JumpTask jumpTask1 = new JumpTask();
-					// Get the path to Calculator and set the JumpTask properties.
-					jumpTask1.ApplicationPath = System.Reflection.Assembly.GetEntryAssembly().Location;
-					jumpTask1.IconResourcePath = entry.Path;
-					jumpTask1.Title = entry.Name;
-					//jumpTask1.Description = "Open Calculator.";
-					jumpTask1.CustomCategory = profile.Name;
-					jumpTask1.Arguments = string.Format("\"{0}\" \"{1}\"", profile.Name, entry.Path);
-					jumpList.JumpItems.Add(jumpTask1);
+					JumpTask jumpTask = new JumpTask();
+
+					jumpTask.ApplicationPath = System.Reflection.Assembly.GetEntryAssembly().Location;
+					jumpTask.IconResourcePath = entry.Path;
+					jumpTask.Title = entry.Name;
+					//jumpTask.Description = "Open Calculator.";
+					jumpTask.CustomCategory = profile.Name;
+					jumpTask.Arguments = string.Format("\"{0}\" \"{1}\"", profile.Name, entry.Path);
+					jumpList.JumpItems.Add(jumpTask);
 				}
 			}
 			jumpList.Apply();

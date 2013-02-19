@@ -1,6 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,15 +18,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Drawing;
-using Microsoft.Win32;
-using System.Diagnostics;
-using System.IO;
-using System.Drawing.Imaging;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.Serialization;
 using System.Windows.Shell;
+using Microsoft.Win32;
+using System.ComponentModel;
 
 namespace RunAsDotNet
 {
@@ -51,7 +52,6 @@ namespace RunAsDotNet
 				_profiles.DefaultProfile = "Default";
 			}
 			cmbProfiles.ItemsSource = _profiles;
-			//cmbProfiles.SelectedIndex = 0;
 		}
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -164,24 +164,18 @@ namespace RunAsDotNet
 			if (entry != null)
 			{
 				Profile profile = cmbProfiles.SelectedItem as Profile;
-				int index = profile.Entries.IndexOf(entry);
-				profile.Entries.Move(index, 0);
 
 				CreateJumpTasks();
 
-				string user = txtUserName.Text;
-				string domain = txtDomain.Text;
-				string password = txtPassword.Password;
-				string program = entry.Path;
-
 				try
 				{
-					Win32.LaunchCommand(program, domain, user, password, Win32.LogonFlags.LOGON_NETCREDENTIALS_ONLY);
+					profile.LaunchProgram(entry);
 				}
 				catch (Exception ex)
 				{
 					MessageBox.Show("LaunchCommand error: " + ex.Message);
 				}
+				lstPrograms.Items.Refresh();
 			}
 		}
 
@@ -197,6 +191,7 @@ namespace RunAsDotNet
 				else
 					txtPassword.Password = aes.Decrypt(profile.Password);
 			}
+
 		}
 
 		private void SaveProfiles()

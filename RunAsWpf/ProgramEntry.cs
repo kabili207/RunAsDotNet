@@ -12,15 +12,27 @@ using System.Windows.Media.Imaging;
 
 namespace RunAsDotNet
 {
+	/// <summary>
+	/// Represents an individual program entry in a profile
+	/// </summary>
 	[Serializable]
 	public class ProgramEntry : INotifyPropertyChanged
 	{
+		[field: NonSerialized]
+		public event PropertyChangedEventHandler PropertyChanged;
+
 		private string _name;
 		private string _path;
 
-		[NonSerialized]
-		private ImageSource _image;
+		[OptionalField(VersionAdded = 2)]
+		private DateTime? _lastRan;
 
+		[NonSerialized]
+		private BitmapSource _image;
+
+		/// <summary>
+		/// Gets or sets the display name of this program entry
+		/// </summary>
 		public string Name
 		{
 			get { return _name; }
@@ -31,6 +43,9 @@ namespace RunAsDotNet
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the file path of the program
+		/// </summary>
 		public string Path
 		{
 			get { return _path; }
@@ -41,7 +56,10 @@ namespace RunAsDotNet
 			}
 		}
 
-		public ImageSource Image
+		/// <summary>
+		/// Gets or sets the icon of this program
+		/// </summary>
+		public BitmapSource Image
 		{
 			get { return _image; }
 			set
@@ -51,8 +69,19 @@ namespace RunAsDotNet
 			}
 		}
 
-		[field: NonSerialized]
-		public event PropertyChangedEventHandler PropertyChanged;
+		/// <summary>
+		/// Gets or sets the date and time this program was last ran
+		/// </summary>
+		public DateTime? LastRan
+		{
+			get { return _lastRan; }
+			set
+			{
+				_lastRan = value;
+				OnPropertyChanged("LastRan");
+			}
+		}
+
 
 		private void OnPropertyChanged(string prop)
 		{
@@ -68,6 +97,11 @@ namespace RunAsDotNet
 			SetImage(IconFromFilePath(Path));
 		}
 
+		/// <summary>
+		/// Gets the icon associated with the specified file
+		/// </summary>
+		/// <param name="filePath">The path of the icon</param>
+		/// <returns>The icon associated with the file</returns>
 		public static Icon IconFromFilePath(string filePath)
 		{
 			Icon result = null;
@@ -77,11 +111,15 @@ namespace RunAsDotNet
 			}
 			catch
 			{
-				// swallow and return nothing. You could supply a default Icon here as well
+				// We could supply a default Icon here...
 			}
 			return result;
 		}
 
+		/// <summary>
+		/// Sets the image of the program using the specified <see cref="System.Drawing.Icon"/>
+		/// </summary>
+		/// <param name="icon">The icon</param>
 		public void SetImage(Icon icon)
 		{
 			if (icon == null)

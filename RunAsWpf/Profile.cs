@@ -8,6 +8,9 @@ using System.Runtime.Serialization;
 
 namespace RunAsDotNet
 {
+	/// <summary>
+	/// Represents a profile configuration 
+	/// </summary>
 	[Serializable]
 	public class Profile : INotifyPropertyChanged
 	{
@@ -18,6 +21,9 @@ namespace RunAsDotNet
 		private string _userName;
 		private string _password;
 
+		/// <summary>
+		/// Gets or sets the name of the profile
+		/// </summary>
 		public string Name
 		{
 			get { return _name; }
@@ -28,6 +34,9 @@ namespace RunAsDotNet
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the domain to authenticate against
+		/// </summary>
 		public string Domain
 		{
 			get { return _domain; }
@@ -38,6 +47,9 @@ namespace RunAsDotNet
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the user's login name
+		/// </summary>
 		public string UserName
 		{
 			get { return _userName; }
@@ -48,6 +60,9 @@ namespace RunAsDotNet
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the user's password
+		/// </summary>
 		public string Password
 		{
 			get { return _password; }
@@ -75,15 +90,28 @@ namespace RunAsDotNet
 			}
 		}
 
+		/// <summary>
+		/// Launches the specified program entry
+		/// </summary>
+		/// <param name="entry">The program entry to launch</param>
 		public void LaunchProgram(ProgramEntry entry)
 		{
 			LaunchProgram(entry.Path);
+			entry.LastRan = DateTime.Now;
+
+			// TODO: Remove this
+			int index = Entries.IndexOf(entry);
+			Entries.Move(index, 0);
 		}
 
+		/// <summary>
+		/// Launches the specifed command path
+		/// </summary>
+		/// <param name="path">The path of the command</param>
 		public void LaunchProgram(string path)
 		{
 			string pass = new SimpleAES().Decrypt(_password);
-			Win32.LaunchCommand(path, _domain, _userName, pass, Win32.LogonFlags.LOGON_NETCREDENTIALS_ONLY);
+			Win32.LaunchCommand(path, _domain, _userName, pass, Win32.LogonFlags.NetCredentialsOnly);
 		}
 
 	}

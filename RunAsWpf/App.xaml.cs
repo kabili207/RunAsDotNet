@@ -40,12 +40,14 @@ namespace RunAsDotNet
 						Profile profile = profiles.GetByName(sProfile);
 						if (profile != null)
 						{
-							profile.LaunchProgram(sPath);
 							ProgramEntry entry = profile.Entries.GetByPath(sPath);
-							if (entry != null)
+							if (entry == null)
 							{
-								int index = profile.Entries.IndexOf(entry);
-								profile.Entries.Move(index, 0);
+								profile.LaunchProgram(sPath);
+							}
+							else
+							{
+								profile.LaunchProgram(entry);
 							}
 							doShutDown = true;
 						}

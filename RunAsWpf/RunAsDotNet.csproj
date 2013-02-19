@@ -76,7 +76,6 @@
     </ApplicationDefinition>
     <Compile Include="Csidl.cs" />
     <Compile Include="MsiShortcutParser.cs" />
-    <Compile Include="PrincipalContext.cs" />
     <Compile Include="Profile.cs" />
     <Compile Include="ProfileCollection.cs" />
     <Compile Include="ProgramEntry.cs" />
@@ -140,15 +139,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="runas.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\add.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\delete.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\edit.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
