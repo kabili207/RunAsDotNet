@@ -98,7 +98,7 @@ namespace RunAsDotNet
 			jumpList.JumpItems.Clear();
 			foreach (Profile profile in this)
 			{
-				foreach (ProgramEntry entry in profile.Entries.SortedView)
+				foreach (ProgramEntry entry in profile.SortedView)
 				{
 					JumpTask jumpTask = new JumpTask();
 

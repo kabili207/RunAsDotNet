@@ -5,6 +5,7 @@ using System.Text;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.Serialization;
+using System.Windows.Data;
 
 namespace RunAsDotNet
 {
@@ -14,12 +15,47 @@ namespace RunAsDotNet
 	[Serializable]
 	public class Profile : INotifyPropertyChanged
 	{
-		public ProgramEntryCollection Entries { get; set; }
+		public enum SortMethod { Recent, Alphabetical, Frequent }
+
+		[field: NonSerialized]
+		public event PropertyChangedEventHandler PropertyChanged;
 
 		private string _name;
 		private string _domain;
 		private string _userName;
 		private string _password;
+
+		[OptionalField(VersionAdded = 2)]
+		private CircularBuffer<ProgramEntry> _recentApps = new CircularBuffer<ProgramEntry>(20);
+
+		[OptionalField(VersionAdded = 2)]
+		private SortMethod _sortOrder = SortMethod.Recent;
+
+		[NonSerialized]
+		ListCollectionView _sortedView;
+
+		public ProgramEntryCollection Entries { get; set; }
+
+		/// <summary>
+		/// Gets or sets the sort order of the program entries.
+		/// This value is not yet used.
+		/// </summary>
+		public SortMethod SortOrder
+		{
+			get { return _sortOrder; }
+			set
+			{
+				_sortOrder = value;
+				ResortView();
+				OnPropertyChanged("SortOrder");
+			}
+		}
+
+		public CollectionView SortedView
+		{
+			get { return _sortedView; }
+		}
+
 
 		/// <summary>
 		/// Gets or sets the name of the profile
@@ -73,13 +109,27 @@ namespace RunAsDotNet
 			}
 		}
 
-
-		[field: NonSerialized]
-		public event PropertyChangedEventHandler PropertyChanged;
+		public CircularBuffer<ProgramEntry> RecentApps
+		{
+			get { return _recentApps; }
+		}
 
 		public Profile()
 		{
 			Entries = new ProgramEntryCollection();
+			_sortedView = new ListCollectionView(Entries);
+			ResortView();
+		}
+
+
+		[OnDeserialized]
+		private void SetValuesOnDeserialized(StreamingContext context)
+		{
+			if (_recentApps == null)
+				_recentApps = new CircularBuffer<ProgramEntry>(20);
+
+			_sortedView = new ListCollectionView(Entries);
+			ResortView();
 		}
 
 		private void OnPropertyChanged(string prop)
@@ -98,6 +148,7 @@ namespace RunAsDotNet
 		{
 			LaunchProgram(entry.Path);
 			entry.LastRan = DateTime.Now;
+			RecentApps.Put(entry);
 
 			// TODO: Remove this
 			int index = Entries.IndexOf(entry);
@@ -112,6 +163,48 @@ namespace RunAsDotNet
 		{
 			string pass = new SimpleAES().Decrypt(_password);
 			Win32.LaunchCommand(path, _domain, _userName, pass, Win32.LogonFlags.NetCredentialsOnly);
+		}
+
+		private void ResortView()
+		{
+			_sortedView.SortDescriptions.Clear();
+			_sortedView.CustomSort = null;
+			switch (SortOrder)
+			{
+				case SortMethod.Alphabetical:
+					_sortedView.SortDescriptions.Add(
+						new SortDescription("Name", ListSortDirection.Ascending));
+					break;
+				case SortMethod.Frequent:
+					_sortedView.CustomSort = new RecentComparer(_recentApps);
+					break;
+				default:
+				case SortMethod.Recent:
+					_sortedView.SortDescriptions.Add(
+						new SortDescription("LastRan", ListSortDirection.Descending));
+					break;
+			}
+		}
+
+		private class RecentComparer : System.Collections.IComparer
+		{
+			CircularBuffer<ProgramEntry> _recent = null;
+
+			public RecentComparer(CircularBuffer<ProgramEntry> recent)
+			{
+				_recent = recent;
+			}
+
+			public int Compare(object objX, object objY)
+			{
+				ProgramEntry x = objX as ProgramEntry;
+				ProgramEntry y = objY as ProgramEntry;
+				if (x == null || y == null)
+					throw new ArgumentException("Both objects must be of type ProgramEntry");
+				int countX = _recent.Count(a => a == x);
+				int countY = _recent.Count(a => a == y);
+				return countY.CompareTo(countX);
+			}
 		}
 
 	}

@@ -24,6 +24,7 @@ namespace RunAsDotNet
 
 		protected override void OnStartup(StartupEventArgs e)
 		{
+
 			bool doShutDown = false;
 			if (e.Args != null && e.Args.Count() > 1)
 			{

@@ -77,6 +77,7 @@ namespace RunAsDotNet
 			{
 				Profile profile = cmbProfiles.SelectedItem as Profile;
 				profile.Entries.Remove(entry);
+				profile.RecentApps.RemoveAll(entry);
 				SaveProfiles();
 				CreateJumpTasks();
 			}
@@ -98,6 +99,14 @@ namespace RunAsDotNet
 					AddProgram(ofd.FileNames);
 				}
 			}
+		}
+
+		private void btnSortPrograms_Click(object sender, RoutedEventArgs e)
+		{
+			(sender as Button).ContextMenu.IsEnabled = true;
+			(sender as Button).ContextMenu.PlacementTarget = (sender as Button);
+			(sender as Button).ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+			(sender as Button).ContextMenu.IsOpen = true;
 		}
 
 		private void AddProgram(string files)
@@ -320,6 +329,39 @@ namespace RunAsDotNet
 					}
 				}
 				e.Handled = true;
+			}
+		}
+
+		private void miSortAlpha_Click(object sender, RoutedEventArgs e)
+		{
+			Profile profile = cmbProfiles.SelectedItem as Profile;
+			if (profile != null)
+			{
+				profile.SortOrder = Profile.SortMethod.Alphabetical;
+				CreateJumpTasks();
+				SaveProfiles();
+			}
+		}
+
+		private void miSortFrequent_Click(object sender, RoutedEventArgs e)
+		{
+			Profile profile = cmbProfiles.SelectedItem as Profile;
+			if (profile != null)
+			{
+				profile.SortOrder = Profile.SortMethod.Frequent;
+				CreateJumpTasks();
+				SaveProfiles();
+			}
+		}
+
+		private void miSortRecent_Click(object sender, RoutedEventArgs e)
+		{
+			Profile profile = cmbProfiles.SelectedItem as Profile;
+			if (profile != null)
+			{
+				profile.SortOrder = Profile.SortMethod.Recent;
+				CreateJumpTasks();
+				SaveProfiles();
 			}
 		}
 	}
