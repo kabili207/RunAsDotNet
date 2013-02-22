@@ -28,39 +28,46 @@ namespace RunAsDotNet
 			bool doShutDown = false;
 			if (e.Args != null && e.Args.Count() > 1)
 			{
-				string sProfile = e.Args[0];
-				string sPath = e.Args[1];
-
-				string path = App.AppDataPath + "\\Profiles.dat";
-				ProfileCollection profiles = null;
-				using (FileStream fs = new FileStream(path, FileMode.Open))
+				try
 				{
-					profiles = ProfileCollection.FromStream(fs);
-					if (profiles != null)
+					string sProfile = e.Args[0];
+					string sPath = e.Args[1];
+
+					string path = App.AppDataPath + "\\Profiles.dat";
+					ProfileCollection profiles = null;
+					using (FileStream fs = new FileStream(path, FileMode.Open))
 					{
-						Profile profile = profiles.GetByName(sProfile);
-						if (profile != null)
+						profiles = ProfileCollection.FromStream(fs);
+						if (profiles != null)
 						{
-							ProgramEntry entry = profile.Entries.GetByPath(sPath);
-							if (entry == null)
+							Profile profile = profiles.GetByName(sProfile);
+							if (profile != null)
 							{
-								profile.LaunchProgram(sPath);
+								ProgramEntry entry = profile.Entries.GetByPath(sPath);
+								if (entry == null)
+								{
+									profile.LaunchProgram(sPath);
+								}
+								else
+								{
+									profile.LaunchProgram(entry);
+								}
+								doShutDown = true;
 							}
-							else
-							{
-								profile.LaunchProgram(entry);
-							}
-							doShutDown = true;
+						}
+					}
+					if (doShutDown)
+					{
+						using (FileStream fs = new FileStream(path, FileMode.Create))
+						{
+							profiles.ToStream(fs);
+							profiles.CreateJumpTasks(new System.Windows.Shell.JumpList());
 						}
 					}
 				}
-				if (doShutDown)
+				catch (Exception ex)
 				{
-					using (FileStream fs = new FileStream(path, FileMode.Create))
-					{
-						profiles.ToStream(fs);
-						profiles.CreateJumpTasks(new System.Windows.Shell.JumpList());
-					}
+					MessageBox.Show("Error launching application: " + ex.Message);
 				}
 			}
 

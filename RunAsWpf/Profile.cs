@@ -125,9 +125,9 @@ namespace RunAsDotNet
 		[OnDeserialized]
 		private void SetValuesOnDeserialized(StreamingContext context)
 		{
-			if (_recentApps == null)
+			if (_recentApps == null || _recentApps.Capacity == 0)
 				_recentApps = new CircularBuffer<ProgramEntry>(20);
-
+			_recentApps.AllowOverflow = true;
 			_sortedView = new ListCollectionView(Entries);
 			ResortView();
 		}

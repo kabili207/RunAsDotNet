@@ -38,17 +38,17 @@ namespace RunAsDotNet
 	[Serializable]
     public class CircularBuffer<T> : ICollection<T>, IEnumerable<T>, ICollection, IEnumerable
     {
-        private int capacity;
-        private int size;
-        private int head;
-        private int tail;
-        private T[] buffer;
+        private int _capacity;
+        private int _size;
+        private int _head;
+        private int _tail;
+        private T[] _buffer;
 
         [NonSerialized()]
         private object syncRoot;
 
         public CircularBuffer(int capacity)
-            : this(capacity, false)
+            : this(capacity, true)
         {
         }
 
@@ -57,11 +57,11 @@ namespace RunAsDotNet
             if (capacity < 0)
                 throw new ArgumentException("The buffer capacity must be greater than or equal to zero.", "capacity");
 
-            this.capacity = capacity;
-            size = 0;
-            head = 0;
-            tail = 0;
-            buffer = new T[capacity];
+            this._capacity = capacity;
+            _size = 0;
+            _head = 0;
+            _tail = 0;
+            _buffer = new T[capacity];
             AllowOverflow = allowOverflow;
         }
 
@@ -73,42 +73,42 @@ namespace RunAsDotNet
 
         public int Capacity
         {
-            get { return capacity; }
+            get { return _capacity; }
             set
             {
-                if (value == capacity)
+                if (value == _capacity)
                     return;
 
-                if (value < size)
+                if (value < _size)
                     throw new ArgumentOutOfRangeException("value", "The new capacity must be greater than or equal to the buffer size.");
 
                 var dst = new T[value];
-                if (size > 0)
+                if (_size > 0)
                     CopyTo(dst);
-                buffer = dst;
+                _buffer = dst;
 
-                capacity = value;
+                _capacity = value;
             }
         }
 
         public int Size
         {
-            get { return size; }
+            get { return _size; }
         }
 
         public bool Contains(T item)
         {
-            int bufferIndex = head;
+            int bufferIndex = _head;
             var comparer = EqualityComparer<T>.Default;
-            for (int i = 0; i < size; i++, bufferIndex++)
+            for (int i = 0; i < _size; i++, bufferIndex++)
             {
-                if (bufferIndex == capacity)
+                if (bufferIndex == _capacity)
                     bufferIndex = 0;
 
-                if (item == null && buffer[bufferIndex] == null)
+                if (item == null && _buffer[bufferIndex] == null)
                     return true;
-                else if ((buffer[bufferIndex] != null) &&
-                    comparer.Equals(buffer[bufferIndex], item))
+                else if ((_buffer[bufferIndex] != null) &&
+                    comparer.Equals(_buffer[bufferIndex], item))
                     return true;
             }
 
@@ -117,9 +117,9 @@ namespace RunAsDotNet
 
         public void Clear()
         {
-            size = 0;
-            head = 0;
-            tail = 0;
+            _size = 0;
+            _head = 0;
+            _tail = 0;
         }
 
         public int Put(T[] src)
@@ -129,36 +129,36 @@ namespace RunAsDotNet
 
         public int Put(T[] src, int offset, int count)
         {
-            if (!AllowOverflow &&  count > capacity - size)
+            if (!AllowOverflow &&  count > _capacity - _size)
                 throw new InvalidOperationException("The buffer does not have sufficient capacity to put new items.");
 
             int srcIndex = offset;
-            for (int i = 0; i < count; i++, tail++, srcIndex++)
+            for (int i = 0; i < count; i++, _tail++, srcIndex++)
             {
-                if (tail == capacity)
-                    tail = 0;
-                buffer[tail] = src[srcIndex];
+                if (_tail == _capacity)
+                    _tail = 0;
+                _buffer[_tail] = src[srcIndex];
             }
-            size = Math.Min(size + count, capacity);
+            _size = Math.Min(_size + count, _capacity);
             return count;
         }
 
         public void Put(T item)
         {
-            if (!AllowOverflow && size == capacity)
+            if (!AllowOverflow && _size == _capacity)
                 throw new InvalidOperationException("The buffer does not have sufficient capacity to put new items.");
 
-            buffer[tail] = item;
-            if (++tail == capacity)
-                tail = 0;
-            size++;
+            _buffer[_tail] = item;
+            if (++_tail == _capacity)
+                _tail = 0;
+            _size++;
         }
 
         public void Skip(int count)
         {
-            head += count;
-            if (head >= capacity)
-                head -= capacity;
+            _head += count;
+            if (_head >= _capacity)
+                _head -= _capacity;
         }
 
         public T[] Get(int count)
@@ -175,27 +175,27 @@ namespace RunAsDotNet
 
         public int Get(T[] dst, int offset, int count)
         {
-            int realCount = Math.Min(count, size);
+            int realCount = Math.Min(count, _size);
             int dstIndex = offset;
-            for (int i = 0; i < realCount; i++, head++, dstIndex++)
+            for (int i = 0; i < realCount; i++, _head++, dstIndex++)
             {
-                if (head == capacity)
-                    head = 0;
-                dst[dstIndex] = buffer[head];
+                if (_head == _capacity)
+                    _head = 0;
+                dst[dstIndex] = _buffer[_head];
             }
-            size -= realCount;
+            _size -= realCount;
             return realCount;
         }
 
         public T Get()
         {
-            if (size == 0)
+            if (_size == 0)
                 throw new InvalidOperationException("The buffer is empty.");
 
-            var item = buffer[head];
-            if (++head == capacity)
-                head = 0;
-            size--;
+            var item = _buffer[_head];
+            if (++_head == _capacity)
+                _head = 0;
+            _size--;
             return item;
         }
 
@@ -206,43 +206,43 @@ namespace RunAsDotNet
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            CopyTo(0, array, arrayIndex, size);
+            CopyTo(0, array, arrayIndex, _size);
         }
 
         public void CopyTo(int index, T[] array, int arrayIndex, int count)
         {
-            if (count > size)
+            if (count > _size)
                 throw new ArgumentOutOfRangeException("count", "The read count cannot be greater than the buffer size.");
 
-            int bufferIndex = head;
+            int bufferIndex = _head;
             for (int i = 0; i < count; i++, bufferIndex++, arrayIndex++)
             {
-                if (bufferIndex == capacity)
+                if (bufferIndex == _capacity)
                     bufferIndex = 0;
-                array[arrayIndex] = buffer[bufferIndex];
+                array[arrayIndex] = _buffer[bufferIndex];
             }
         }
 
         public IEnumerator<T> GetEnumerator()
         {
-            int bufferIndex = head;
-            for (int i = 0; i < size; i++, bufferIndex++)
+            int bufferIndex = _head;
+            for (int i = 0; i < _size; i++, bufferIndex++)
             {
-                if (bufferIndex == capacity)
+                if (bufferIndex == _capacity)
                     bufferIndex = 0;
 
-                yield return buffer[bufferIndex];
+                yield return _buffer[bufferIndex];
             }
         }
 
         public T[] GetBuffer()
         {
-            return buffer;
+            return _buffer;
         }
 
         public T[] ToArray()
         {
-            var dst = new T[size];
+            var dst = new T[_size];
             CopyTo(dst);
             return dst;
         }
@@ -306,7 +306,7 @@ namespace RunAsDotNet
 
         bool ICollection<T>.Remove(T item)
         {
-            if (size == 0)
+            if (_size == 0)
                 return false;
 
             Remove(item);

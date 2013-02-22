@@ -61,7 +61,7 @@ namespace RunAsDotNet
 			{
 				Profile profile = _profiles.GetByName(_profiles.DefaultProfile);
 				if (profile != null)
-					cmbProfiles.SelectedItem = profile; 
+					cmbProfiles.SelectedItem = profile;
 			}
 		}
 
@@ -148,7 +148,7 @@ namespace RunAsDotNet
 				}
 				if (failedFiles.Count > 0)
 				{
-					MessageBox.Show("The program(s) have already been added:" + 
+					MessageBox.Show("The program(s) have already been added:" +
 						string.Join(Environment.NewLine, failedFiles.ToArray()),
 						"Failed to add program", MessageBoxButton.OK, MessageBoxImage.Error);
 				}

@@ -17,7 +17,9 @@ namespace RunAsDotNet
 			100, 195, 225, 148, 255, 121, 185, 15, 144
 		};
 		private static readonly byte[] vector =
-		{ 201, 76, 133, 104, 169, 63, 37, 250, 148, 188, 31, 127, 8, 52, 41, 70 };
+		{ 
+			201, 76, 133, 104, 169, 63, 37, 250, 148, 188, 31, 127, 8, 52, 41, 70
+		};
 
 		private ICryptoTransform encryptor, decryptor;
 		private UTF8Encoding encoder;

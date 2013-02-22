@@ -12,7 +12,7 @@ namespace RunAsDotNet
 	[Serializable]
 	public class ProgramEntryCollection : ObservableCollection<ProgramEntry>
 	{
-		
+
 
 		public ProgramEntryCollection()
 			: base()

@@ -19,7 +19,7 @@ namespace RunAsDotNet
 		#endregion
 
 		#region "ENUMS"
-		
+
 		[Flags]
 		public enum CreationFlags
 		{
@@ -115,7 +115,7 @@ namespace RunAsDotNet
 		#endregion
 
 		#region "FUNCTIONS (P/INVOKE)"
-		
+
 		[DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
 		public static extern Boolean CreateProcessWithLogonW
 		(
@@ -208,7 +208,7 @@ namespace RunAsDotNet
 				CloseHandle(processInfo.hThread);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets the path of the start menu
 		/// </summary>

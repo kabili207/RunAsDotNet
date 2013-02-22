@@ -69,7 +69,7 @@ namespace RunAsDotNet
 				throw;
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets the default profile if one exists.
 		/// </summary>
