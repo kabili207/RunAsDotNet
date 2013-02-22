@@ -214,7 +214,7 @@ namespace RunAsDotNet
 
 			path += "\\Profiles.dat";
 
-			using (FileStream fs = new FileStream(path, FileMode.Create))
+			using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write))
 			{
 				_profiles.ToStream(fs);
 			}
@@ -229,7 +229,7 @@ namespace RunAsDotNet
 		{
 			string path = App.AppDataPath + "\\Profiles.dat";
 
-			using (FileStream fs = new FileStream(path, FileMode.Open))
+			using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
 			{
 				_profiles = ProfileCollection.FromStream(fs);
 			}

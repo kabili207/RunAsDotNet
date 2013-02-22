@@ -35,39 +35,40 @@ namespace RunAsDotNet
 
 					string path = App.AppDataPath + "\\Profiles.dat";
 					ProfileCollection profiles = null;
-					using (FileStream fs = new FileStream(path, FileMode.Open))
+					using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
 					{
 						profiles = ProfileCollection.FromStream(fs);
-						if (profiles != null)
+					}
+					if (profiles != null)
+					{
+						Profile profile = profiles.GetByName(sProfile);
+						if (profile != null)
 						{
-							Profile profile = profiles.GetByName(sProfile);
-							if (profile != null)
+							ProgramEntry entry = profile.Entries.GetByPath(sPath);
+							if (entry == null)
 							{
-								ProgramEntry entry = profile.Entries.GetByPath(sPath);
-								if (entry == null)
-								{
-									profile.LaunchProgram(sPath);
-								}
-								else
-								{
-									profile.LaunchProgram(entry);
-								}
-								doShutDown = true;
+								profile.LaunchProgram(sPath);
 							}
+							else
+							{
+								profile.LaunchProgram(entry);
+							}
+							doShutDown = true;
 						}
 					}
 					if (doShutDown)
 					{
-						using (FileStream fs = new FileStream(path, FileMode.Create))
+						using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write))
 						{
 							profiles.ToStream(fs);
-							profiles.CreateJumpTasks(new System.Windows.Shell.JumpList());
 						}
+						profiles.CreateJumpTasks(new System.Windows.Shell.JumpList());
 					}
 				}
 				catch (Exception ex)
 				{
 					MessageBox.Show("Error launching application: " + ex.Message);
+					doShutDown = true;
 				}
 			}
 
