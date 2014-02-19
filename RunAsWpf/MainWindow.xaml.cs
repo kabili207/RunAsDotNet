@@ -128,7 +128,7 @@ namespace RunAsDotNet
 					string realPath = file;
 					FileInfo info = new FileInfo(realPath);
 					if (info.Extension.ToLower() == ".lnk")
-						realPath = MsiShortcutParser.ParseShortcut(realPath);
+						realPath = ShortcutParser.Parse(realPath);
 					entry.Path = realPath;
 					entry.Name = file;
 

@@ -8,7 +8,7 @@ namespace RunAsDotNet
 {
 	// This class was downloaded and modified from the source available at
 	// http://www.geektieguy.com/2007/11/19/how-to-parse-special-lnk-files-aka-msi-shortcuts-aka-windows-installer-advertised-shortcuts-using-c/
-	public class MsiShortcutParser
+	public class ShortcutParser
 	{
 		/*
 		UINT MsiGetShortcutTarget(
@@ -63,7 +63,7 @@ namespace RunAsDotNet
 		/// <returns>
 		/// The path of the executable or <c>null</c> if the shortcut could not be parsed
 		/// </returns>
-		public static string ParseShortcut(string file)
+		public static string Parse(string file)
 		{
 			StringBuilder product = new StringBuilder(MaxGuidLength + 1);
 			StringBuilder feature = new StringBuilder(MaxFeatureLength + 1);
