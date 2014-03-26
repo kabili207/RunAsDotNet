@@ -72,6 +72,11 @@
 									<TextBlock Text="{Binding Path=Path}" Height="16" HorizontalAlignment="Left" VerticalAlignment="Top" />
 								</StackPanel>
 							</StackPanel.ToolTip>
+							<StackPanel.ContextMenu>
+								<ContextMenu>
+									<MenuItem Header="Create Desktop Shortcut" Name="mnuCreateDesktop" Tag="{Binding}" Click="mnuCreateDesktop_Click" />
+								</ContextMenu>
+							</StackPanel.ContextMenu>
 						</StackPanel>
 					</StackPanel>
 				</DataTemplate>

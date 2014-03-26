@@ -76,7 +76,7 @@
     </ApplicationDefinition>
     <Compile Include="CircularBuffer.cs" />
     <Compile Include="Csidl.cs" />
-    <Compile Include="MsiShortcutParser.cs" />
+    <Compile Include="ShortcutParser.cs" />
     <Compile Include="Profile.cs" />
     <Compile Include="ProfileCollection.cs" />
     <Compile Include="ProgramEntry.cs" />

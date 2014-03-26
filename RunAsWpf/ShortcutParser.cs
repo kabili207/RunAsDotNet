@@ -88,5 +88,18 @@ namespace RunAsDotNet
 				return null;
 			}
 		}
+
+		public static void CreateShortcut(string executable, string arguments, string description, string destination, string iconPath = null)
+		{
+			Wsh.WshShell shell = new Wsh.WshShell();
+			Wsh.IWshShortcut shortcut = (Wsh.IWshShortcut)shell.CreateShortcut(destination);
+			shortcut.Description = description;
+			shortcut.TargetPath = executable;
+			shortcut.Arguments = arguments;
+			if (iconPath != null)
+				shortcut.IconLocation = iconPath;
+			shortcut.Save();
+		}
+
 	}
 }

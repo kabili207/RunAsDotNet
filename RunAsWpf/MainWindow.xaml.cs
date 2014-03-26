@@ -364,5 +364,21 @@ namespace RunAsDotNet
 				SaveProfiles();
 			}
 		}
+
+		private void mnuCreateDesktop_Click(object sender, RoutedEventArgs e)
+		{
+			Profile profile = cmbProfiles.SelectedItem as Profile;
+			if (profile != null && sender is FrameworkElement && ((FrameworkElement)sender).Tag is ProgramEntry)
+			{
+				ProgramEntry entry = (ProgramEntry)((FrameworkElement)sender).Tag;
+				ShortcutParser.CreateShortcut(System.Reflection.Assembly.GetEntryAssembly().Location,
+					string.Format("\"{0}\" \"{1}\"", profile.Name, entry.Path),
+					string.Format("{0} ({1})", entry.Name, profile.Name),
+					Win32.GetSpecialFolderPath(Csidl.DesktopDirectory) +
+					System.IO.Path.DirectorySeparatorChar + string.Format("{0} ({1}).lnk", entry.Name, profile.Name),
+					string.Format("{0},0", entry.Path));
+
+			}
+		}
 	}
 }
