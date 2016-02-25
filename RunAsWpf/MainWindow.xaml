@@ -93,6 +93,24 @@
 		<Button HorizontalAlignment="Left" Margin="255,12,0,0" Name="btnDeleteProfile" VerticalAlignment="Top" Click="btnDeleteProfile_Click" ToolTip="Remove Profile">
 			<Image Source="/RunAsDotNet;component/Images/delete.png" Width="16" Height="16" />
 		</Button>
+		<CheckBox x:Name="chkNoProfile" Content="No Profile" HorizontalAlignment="Left" Margin="204,49,0,0" VerticalAlignment="Top" IsChecked="{Binding NoProfile}" Checked="chkNoProfile_CheckChanged" Unchecked="chkNoProfile_CheckChanged">
+			<CheckBox.ToolTip>
+				<TextBlock Width="250" TextWrapping="Wrap">
+					<Run FontWeight="Bold">/noprofile flag</Run><LineBreak />
+					Do not create a local profile. This can speed up launch time,
+					but some programs may crash without a profile.
+				</TextBlock>
+			</CheckBox.ToolTip>
+		</CheckBox>
+		<CheckBox x:Name="chkNetOnly" Content="Net Only" HorizontalAlignment="Left" Margin="204,79,0,0" VerticalAlignment="Top" IsChecked="{Binding NetOnly}" Checked="chkNetOnly_CheckChanged" Unchecked="chkNetOnly_CheckChanged">
+			<CheckBox.ToolTip>
+				<TextBlock Width="250" TextWrapping="Wrap">
+					<Run FontWeight="Bold">/netonly flag</Run><LineBreak />
+					Uses a different set of credentials locally than it does remotely.
+					This is useful in inter-domain scenarios where there is no trust relationship.
+				</TextBlock>
+			</CheckBox.ToolTip>
+		</CheckBox>
 		<Button HorizontalAlignment="Right" Name="btnSortPrograms" VerticalAlignment="Top" Margin="0,109,61,0" Click="btnSortPrograms_Click" ToolTip="Sort Order">
 			<Button.Content>
 				<Image Source="/RunAsDotNet;component/Images/sort.png" Width="16" Height="16" />

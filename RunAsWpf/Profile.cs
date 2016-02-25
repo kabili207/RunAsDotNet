@@ -31,6 +31,12 @@ namespace RunAsDotNet
 		[OptionalField(VersionAdded = 2)]
 		private SortMethod _sortOrder = SortMethod.Recent;
 
+		[OptionalField(VersionAdded = 3)]
+		private bool _netOnly = false;
+
+		[OptionalField(VersionAdded = 3)]
+		private bool _noProfile = false;
+
 		[NonSerialized]
 		ListCollectionView _sortedView;
 
@@ -109,6 +115,32 @@ namespace RunAsDotNet
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether this is a network-only profile.
+		/// </summary>
+		public bool NetOnly
+		{
+			get { return _netOnly; }
+			set
+			{
+				_netOnly = value;
+				OnPropertyChanged("NetOnly");
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets a value indicating if we should create a local profile or not.
+		/// </summary>
+		public bool NoProfile
+		{
+			get { return _noProfile; }
+			set
+			{
+				_noProfile = value;
+				OnPropertyChanged("NoProfile");
+			}
+		}
+
 		public CircularBuffer<ProgramEntry> RecentApps
 		{
 			get { return _recentApps; }
@@ -162,7 +194,11 @@ namespace RunAsDotNet
 		public void LaunchProgram(string path)
 		{
 			string pass = new SimpleAES().Decrypt(_password);
-			Win32.LaunchCommand(path, _domain, _userName, pass, Win32.LogonFlags.NetCredentialsOnly);
+			Win32.LogonFlags flags =
+				_netOnly ? Win32.LogonFlags.NetCredentialsOnly :
+				_noProfile ? Win32.LogonFlags.None : Win32.LogonFlags.WithProfile;
+
+			Win32.LaunchCommand(path, _domain, _userName, pass, flags);
 		}
 
 		private void ResortView()

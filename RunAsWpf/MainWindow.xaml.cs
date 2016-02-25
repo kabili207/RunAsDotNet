@@ -380,5 +380,16 @@ namespace RunAsDotNet
 
 			}
 		}
+
+		private void chkNetOnly_CheckChanged(object sender, RoutedEventArgs e)
+		{
+			chkNoProfile.IsEnabled = !(chkNetOnly.IsChecked ?? false);
+			SaveProfiles();
+		}
+
+		private void chkNoProfile_CheckChanged(object sender, RoutedEventArgs e)
+		{
+			SaveProfiles();
+		}
 	}
 }
