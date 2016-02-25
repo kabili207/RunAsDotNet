@@ -153,6 +153,13 @@ namespace RunAsDotNet
 			ResortView();
 		}
 
+		[OnDeserializing]
+		private void SetValuesOnDeserializing(StreamingContext context)
+		{
+			// Prior to version 3, NetOnly was the default
+			_netOnly = true;
+			_noProfile = false;
+		}
 
 		[OnDeserialized]
 		private void SetValuesOnDeserialized(StreamingContext context)
